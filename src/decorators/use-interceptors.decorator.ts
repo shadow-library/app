@@ -22,7 +22,7 @@ import { INTERCEPTOR_METADATA } from '../constants';
 export function UseInterceptors(...interceptors: Class<unknown>[]): ClassDecorator & MethodDecorator {
   return (target: object, _propertyKey?: string | symbol, descriptor?: TypedPropertyDescriptor<any>): void => {
     const object = descriptor ? descriptor.value : target;
-    assert(object, 'Route decorator can only be applied to class or method');
+    assert(object, 'UseInterceptors decorator can only be applied to class or method');
     assert(interceptors.length > 0, 'UseInterceptors decorator requires at least one interceptor class');
     for (let index = interceptors.length - 1; index >= 0; index--) {
       const interceptor = interceptors[index];

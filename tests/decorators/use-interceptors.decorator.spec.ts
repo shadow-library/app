@@ -139,14 +139,14 @@ describe('UseInterceptors', () => {
       expect(() => {
         // This simulates applying the decorator to an invalid target
         UseInterceptors(LoggingInterceptor)(null as any);
-      }).toThrow('Route decorator can only be applied to class or method');
+      }).toThrow('UseInterceptors decorator can only be applied to class or method');
     });
 
     it('should throw an error when applied to method with undefined descriptor value', () => {
       expect(() => {
         // This simulates applying the decorator to a method with invalid descriptor
         UseInterceptors(LoggingInterceptor)({}, 'testMethod', { value: undefined } as any);
-      }).toThrow('Route decorator can only be applied to class or method');
+      }).toThrow('UseInterceptors decorator can only be applied to class or method');
     });
   });
 });
