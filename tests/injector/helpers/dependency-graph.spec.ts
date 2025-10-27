@@ -45,7 +45,7 @@ describe('DependencyGraph', () => {
     expect(graph.getInitOrder()).toEqual(['D', 'C', 'B', 'A']);
   });
 
-  it('should return the sorted nodes when there circular dependency for all nodes', () => {
+  it('should return the sorted nodes when there is a circular dependency for all nodes', () => {
     graph.addNode('A').addNode('B').addNode('C');
     graph.addDependency('A', 'B');
     graph.addDependency('B', 'C');
@@ -64,7 +64,7 @@ describe('DependencyGraph', () => {
     expect(graph.getInitOrder()).toStrictEqual(['E', 'C', 'D', 'B', 'A']);
   });
 
-  it('should return the sorted nodes when there is multiple circular dependencies', () => {
+  it('should return the sorted nodes when there are multiple circular dependencies', () => {
     graph.addNode('A').addNode('B').addNode('C').addNode('D');
     graph.addDependency('A', 'B');
     graph.addDependency('B', 'C');

@@ -70,21 +70,21 @@ export class DependencyGraph<T extends InjectionToken> {
     }
 
     let current: T | null = null;
-    const orderedNodes: T[] = [];
+    const orderedNodes = new Set<T>();
     while ((current = getNextNode()) !== null) {
       const currentMetadata = metadata.get(current) as NodeMetadata;
-      orderedNodes.push(current);
+      orderedNodes.add(current);
 
       for (const [node, deps] of this.nodeMap.entries()) {
         if (!deps.has(current)) continue;
         const nodeMetadata = metadata.get(node) as NodeMetadata;
         const newDistance = currentMetadata.distance + 1;
         if (newDistance > nodeMetadata.distance) nodeMetadata.distance = newDistance;
-        if (--nodeMetadata.dependsOn === 0 && !orderedNodes.includes(node)) queue.push(node);
+        if (--nodeMetadata.dependsOn === 0 && !orderedNodes.has(node)) queue.push(node);
       }
     }
 
-    return orderedNodes;
+    return Array.from(orderedNodes);
 
     function getNextNode(): T | null {
       if (queue.length > 0) return queue.shift() as T;
