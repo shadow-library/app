@@ -199,7 +199,6 @@ describe('Module', () => {
       @Module(metadata)
       class AliasModule {}
 
-      const instance = {} as any;
       const moduleWithAlias = new ModuleWrapper(AliasModule, metadata);
       moduleWithAlias.addImport(module);
       moduleWithAlias.loadDependencies();
