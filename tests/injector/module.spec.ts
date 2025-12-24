@@ -2,13 +2,14 @@
  * Importing npm packages
  */
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { InternalError } from '@shadow-library/common';
+import { InternalError, Reflector } from '@shadow-library/common';
 
 /**
  * Importing user defined packages
  */
+import { INTERNAL_OPERATION_METADATA } from '@lib/constants';
 import { HookTypes, ModuleRef, Module as ModuleWrapper } from '@lib/injector';
-import { Controller, Inject, Injectable, Module, OnApplicationReady, OnModuleDestroy, OnModuleInit, Optional, Route, forwardRef } from '@shadow-library/app';
+import { Controller, EnableIf, Inject, Injectable, Module, OnApplicationReady, OnModuleDestroy, OnModuleInit, Optional, Route, forwardRef } from '@shadow-library/app';
 
 /**
  * Defining types
@@ -425,7 +426,7 @@ describe('Module', () => {
     it('should bind the controller instance to the route handler', () => {
       const catController = Array.from(module['controllers'].values())[0]!;
       const routeController = module['getControllerRouteMetadata'](catController);
-      const route = routeController.routes[0];
+      const route = routeController?.routes[0];
 
       expect(route?.handler()).toBe(true);
     });
@@ -443,6 +444,61 @@ describe('Module', () => {
       await dogModule.registerRoutes();
 
       expect(router.register.mock.lastCall?.[0]).toHaveLength(2);
+    });
+
+    it('should not register controllers marked as not enabled', async () => {
+      @Controller()
+      @EnableIf(false)
+      class TestController {
+        @Route()
+        getMethod() {}
+
+        @Route()
+        postMethod() {}
+      }
+
+      const testModuleMetadata = { controllers: [TestController] };
+      @Module(testModuleMetadata)
+      class TestModule {}
+
+      const moduleWrapper = new ModuleWrapper(TestModule, testModuleMetadata);
+      jest.spyOn(moduleWrapper as any, 'getRouter').mockReturnValue(router);
+      await moduleWrapper.init();
+      await moduleWrapper.registerRoutes();
+
+      expect(router.register).toBeCalledTimes(1);
+      expect(router.register).toBeCalledWith([]);
+    });
+
+    it('should not register the routes for controllers marked as not enabled', async () => {
+      @Controller()
+      class TestController {
+        @Route()
+        @EnableIf(() => false)
+        getMethod() {}
+
+        @Route()
+        postMethod() {}
+      }
+
+      const testModuleMetadata = { controllers: [TestController] };
+      @Module(testModuleMetadata)
+      class TestModule {}
+
+      const moduleWrapper = new ModuleWrapper(TestModule, testModuleMetadata);
+      jest.spyOn(moduleWrapper as any, 'getRouter').mockReturnValue(router);
+      await moduleWrapper.init();
+      await moduleWrapper.registerRoutes();
+
+      expect(router.register).toBeCalledTimes(1);
+      expect(router.register).toBeCalledWith([
+        {
+          metadata: {},
+          instance: expect.any(TestController),
+          metatype: TestController,
+          routes: [{ metadata: {}, handler: expect.any(Function), handlerName: TestController.prototype.postMethod.name, paramtypes: [], returnType: undefined }],
+        },
+      ]);
     });
 
     it('should start the router', async () => {
