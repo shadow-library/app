@@ -2,12 +2,11 @@
  * Importing npm packages
  */
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { InternalError, Reflector } from '@shadow-library/common';
+import { InternalError } from '@shadow-library/common';
 
 /**
  * Importing user defined packages
  */
-import { INTERNAL_OPERATION_METADATA } from '@lib/constants';
 import { HookTypes, ModuleRef, Module as ModuleWrapper } from '@lib/injector';
 import { Controller, EnableIf, Inject, Injectable, Module, OnApplicationReady, OnModuleDestroy, OnModuleInit, Optional, Route, forwardRef } from '@shadow-library/app';
 
@@ -446,7 +445,7 @@ describe('Module', () => {
       expect(router.register.mock.lastCall?.[0]).toHaveLength(2);
     });
 
-    it('should not register controllers marked as not enabled', async () => {
+    it('should not register controllers marked as disabled', async () => {
       @Controller()
       @EnableIf(false)
       class TestController {
@@ -470,7 +469,7 @@ describe('Module', () => {
       expect(router.register).toBeCalledWith([]);
     });
 
-    it('should not register the routes for controllers marked as not enabled', async () => {
+    it('should not register routes marked as disabled', async () => {
       @Controller()
       class TestController {
         @Route()
